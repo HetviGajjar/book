@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📖 Meri Digital Kitaab</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .book-container {
+            perspective: 2000px;
+        }
+
+        .book {
+            width: 350px;
+            height: 500px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.5s;
+        }
+
+        .book:hover {
+            transform: rotateY(-5deg);
+        }
+
+        .page {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, #f8f4e8 0%, #fff9e6 100%);
+            border-radius: 0 15px 15px 0;
+            box-shadow: 
+                0 0 20px rgba(0,0,0,0.3),
+                inset -3px 0 10px rgba(0,0,0,0.1);
+            transform-origin: left center;
+            transition: transform 0.8s cubic-bezier(0.645, 0.045, 0.355, 1);
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .page::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 30px;
+            height: 100%;
+            background: linear-gradient(to right, 
+                rgba(0,0,0,0.15) 0%, 
+                rgba(0,0,0,0.05) 50%, 
+                transparent 100%);
+        }
+
+        .page.flipped {
+            transform: rotateY(-180deg);
+            pointer-events: none;
+        }
+
+        .page-content {
+            padding: 30px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Cover Page */
+        .page.cover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 4;
+        }
+
+        .cover .page-content {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+        }
+
+        .cover h1 {
+            font-size: 28px;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .cover .subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+
+        .cover .book-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .cover .open-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .cover .open-btn:hover {
+            background: white;
+            color: #764ba2;
+        }
+
+        /* Page 1 */
+        .page.page1 { z-index: 3; }
+        .page.page2 { z-index: 2; }
+        .page.page3 { z-index: 1; }
+
+        .page-title {
+            font-size: 22px;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .page-image {
+            width: 100%;
+            height: 180px;
+            border-radius: 10px;
+            object-fit: cover;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .page-text {
+            font-size: 14px;
+            color: #444;
+            line-height: 1.8;
+            text-align: justify;
+        }
+
+        .page-number {
+            position: absolute;
+            bottom: 20px;
+            right: 30px;
+            font-size: 14px;
+            color: #888;
+        }
+
+        .nav-hint {
+            position: absolute;
+            bottom: 20px;
+            left: 30px;
+            font-size: 12px;
+            color: #667eea;
+        }
+
+        /* Back Cover */
+        .page.back-cover {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            z-index: 0;
+        }
+
+        .back-cover .page-content {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+        }
+
+        .back-cover h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .back-cover .thanks-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .back-cover .restart-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .back-cover .restart-btn:hover {
+            background: white;
+            color: #11998e;
+        }
+
+        /* Quote Box */
+        .quote-box {
+            background: linear-gradient(135deg, #fff5f5, #fff0f0);
+            border-left: 4px solid #e74c3c;
+            padding: 15px;
+            border-radius: 0 10px 10px 0;
+            margin: 15px 0;
+            font-style: italic;
+            color: #555;
+        }
+
+        /* Decorative Elements */
+        .decoration {
+            position: absolute;
+            font-size: 100px;
+            opacity: 0.1;
+            right: 10px;
+            bottom: 50px;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 400px) {
+            .book {
+                width: 300px;
+                height: 450px;
+            }
+            
+            .page-content {
+                padding: 20px;
+            }
+            
+            .page-title {
+                font-size: 18px;
+            }
+            
+            .page-image {
+                height: 140px;
+            }
+            
+            .page-text {
+                font-size: 13px;
+            }
+        }
+
+        /* Loading Animation */
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #1a1a2e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+
+        .loader.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loader-book {
+            font-size: 60px;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loader" id="loader">
+        <div class="loader-book">📚</div>
+    </div>
+
+    <div class="book-container">
+        <div class="book" id="book">
+            
+            <!-- Cover Page -->
+            <div class="page cover" id="cover">
+                <div class="page-content">
+                    <div class="book-icon">📖</div>
+                    <h1>मेरी डिजिटल किताब</h1>
+                    <p class="subtitle">ज्ञान की खोज में एक यात्रा</p>
+                    <button class="open-btn" onclick="flipPage('cover')">
+                        📖 किताब खोलें
+                    </button>
+                </div>
+            </div>
+
+            <!-- Page 1 -->
+            <div class="page page1" id="page1">
+                <div class="page-content">
+                    <h2 class="page-title">🌅 अध्याय 1: नई शुरुआत</h2>
+                    <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400" 
+                         alt="Mountain Sunrise" class="page-image">
+                    <p class="page-text">
+                        हर सुबह एक नई शुरुआत लेकर आती है। जैसे सूरज की पहली किरण पहाड़ों को छूती है, 
+                        वैसे ही हमें भी अपने सपनों को छूने का मौका मिलता है।
+                    </p>
+                    <div class="quote-box">
+                        "जो सपने देखने की हिम्मत रखते हैं, वो पूरी दुनिया जीत सकते हैं।"
+                    </div>
+                    <span class="page-number">1</span>
+                    <span class="nav-hint">→ क्लिक करें</span>
+                    <span class="decoration">🏔️</span>
+                </div>
+            </div>
+
+            <!-- Page 2 -->
+            <div class="page page2" id="page2">
+                <div class="page-content">
+                    <h2 class="page-title">🌿 अध्याय 2: प्रकृति का संदेश</h2>
+                    <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400" 
+                         alt="Forest" class="page-image">
+                    <p class="page-text">
+                        प्रकृति हमें सिखाती है कि जीवन में धैर्य रखना कितना जरूरी है। 
+                        एक छोटा सा बीज, समय के साथ विशाल वृक्ष बन जाता है।
+                    </p>
+                    <div class="quote-box">
+                        "प्रकृति से सीखो, क्योंकि वो कभी जल्दी नहीं करती, फिर भी सब कुछ पूरा हो जाता है।"
+                    </div>
+                    <span class="page-number">2</span>
+                    <span class="nav-hint">→ क्लिक करें</span>
+                    <span class="decoration">🌳</span>
+                </div>
+            </div>
+
+            <!-- Page 3 -->
+            <div class="page page3" id="page3">
+                <div class="page-content">
+                    <h2 class="page-title">⭐ अध्याय 3: सपनों की उड़ान</h2>
+                    <img src="https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=400" 
+                         alt="Stars" class="page-image">
+                    <p class="page-text">
+                        रात का अंधेरा सबसे गहरा तब होता है जब सुबह होने वाली होती है। 
+                        अपने सपनों को कभी मत छोड़ो, क्योंकि सितारे भी अंधेरे में ही चमकते हैं।
+                    </p>
+                    <div class="quote-box">
+                        "सपने वो नहीं जो सोते वक्त आएं, सपने वो हैं जो सोने न दें।"
+                    </div>
+                    <span class="page-number">3</span>
+                    <span class="nav-hint">→ क्लिक करें</span>
+                    <span class="decoration">🌟</span>
+                </div>
+            </div>
+
+            <!-- Back Cover -->
+            <div class="page back-cover">
+                <div class="page-content">
+                    <div class="thanks-icon">🙏</div>
+                    <h2>धन्यवाद!</h2>
+                    <p>पढ़ने के लिए शुक्रिया</p>
+                    <p style="margin-top: 15px; font-size: 14px; opacity: 0.9;">
+                        यह किताब आपको अच्छी लगी हो तो<br>
+                        अपने दोस्तों के साथ शेयर करें! 📤
+                    </p>
+                    <button class="restart-btn" onclick="resetBook()">
+                        🔄 फिर से पढ़ें
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Hide loader after page loads
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                document.getElementById('loader').classList.add('hidden');
+            }, 1000);
+        });
+
+        // Page flip functionality
+        const pages = ['cover', 'page1', 'page2', 'page3'];
+        let currentPage = 0;
+
+        function flipPage(pageId) {
+            const page = document.getElementById(pageId);
+            page.classList.add('flipped');
+            currentPage++;
+        }
+
+        // Click on pages to flip
+        document.querySelectorAll('.page:not(.back-cover)').forEach(page => {
+            page.addEventListener('click', function() {
+                if (!this.classList.contains('flipped')) {
+                    this.classList.add('flipped');
+                }
+            });
+        });
+
+        // Reset book
+        function resetBook() {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('flipped');
+            });
+            currentPage = 0;
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight' && currentPage < pages.length) {
+                flipPage(pages[currentPage]);
+            }
+            if (e.key === 'ArrowLeft') {
+                resetBook();
+            }
+        });
+    </script>
+</body>
+</html>
